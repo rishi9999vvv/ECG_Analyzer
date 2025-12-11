@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECG Arrhythmia Analyzer - Advanced Cardiac Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .heartbeat {
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.3); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.3); }
+            70% { transform: scale(1); }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        footer {
+      		text-align: center;
+      		padding: 15px 0;
+     	 	background-color: #fff;
+      		border-top: 1px solid #e5e7eb;
+      		font-size: 16px;
+      		letter-spacing: 0.5px;
+    		}
+
+        .file-drop-area {
+            transition: all 0.3s ease;
+        }
+        
+        .file-drop-area.drag-over {
+            background-color: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
+        .loading-bar {
+            animation: loading 2s ease-in-out infinite;
+        }
+        
+        @keyframes loading {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-500 p-2 rounded-lg">
+                        <i class="fas fa-heartbeat text-white text-xl heartbeat"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">ECG Analyzer Pro</h1>
+                        <p class="text-xs text-gray-500">Advanced Arrhythmia Detection System</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+                        <span class="text-sm text-gray-600">System Active</span>
+                    </div>
+                    <a href="/learn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                        <i class="fas fa-book mr-2"></i>Learn ECG Basics
+                    </a>
+                    <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i>About Model
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Model Performance Metrics -->
+        <div class="mb-8 slide-up">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Model Performance Metrics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="stat-card bg-white rounded-xl p-4 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Accuracy</p>
+                            <p class="text-2xl font-bold text-gray-900" id="accuracy">98.7%</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-lg">
+                            <i class="fas fa-bullseye text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card bg-white rounded-xl p-4 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Precision</p>
+                            <p class="text-2xl font-bold text-gray-900" id="precision">97.2%</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-crosshairs text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card bg-white rounded-xl p-4 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Recall</p>
+                            <p class="text-2xl font-bold text-gray-900" id="recall">96.5%</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-lg">
+                            <i class="fas fa-chart-line text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card bg-white rounded-xl p-4 border border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">F1 Score</p>
+                            <p class="text-2xl font-bold text-gray-900" id="f1score">96.8%</p>
+                        </div>
+                        <div class="bg-amber-100 p-3 rounded-lg">
+                            <i class="fas fa-award text-amber-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Panel - Upload -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl border border-gray-200 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Upload ECG Signal</h2>
+                    
+                    <div id="dropZone" class="file-drop-area border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-indigo-500 transition cursor-pointer">
+                        <i class="fas fa-file-medical text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-sm font-medium text-gray-700 mb-1">Drop your ECG file here</p>
+                        <p class="text-xs text-gray-500 mb-4">or click to browse</p>
+                        <input type="file" id="fileInput" accept=".dat,.csv,.txt,.mat" class="hidden">
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                            Select File
+                        </button>
+                    </div>
+                    
+                    <div id="fileInfo" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-file-alt text-indigo-600"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900" id="fileName"></p>
+                                    <p class="text-xs text-gray-500" id="fileSize"></p>
+                                </div>
+                            </div>
+                            <button id="removeFile" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="analyzeBtn" class="w-full mt-6 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-microscope mr-2"></i>Analyze ECG
+                    </button>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-xl border border-gray-200 p-6 mt-6">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Detection Capabilities</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Normal Beats</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">N</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">PVC</span>
+                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">V</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">SVE</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">S</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Fusion Beats</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">F</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Unclassifiable</span>
+                            <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">Q</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Results -->
+            <div class="lg:col-span-2">
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden">
+                    <div class="bg-white rounded-xl border border-gray-200 p-12">
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                                <i class="fas fa-heart text-red-500 text-2xl heartbeat"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Analyzing ECG Signal</h3>
+                            <p class="text-sm text-gray-500 mb-6">Processing signal and detecting arrhythmias...</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div class="loading-bar bg-red-500 h-2 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Container -->
+                <div id="resultsContainer" class="hidden space-y-6">
+                    <!-- View Toggle Button -->
+                    <div class="flex justify-end mb-4">
+                        <button id="viewToggle" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                            <i class="fas fa-user-md mr-2"></i>Switch to Clinician View
+                        </button>
+                    </div>
+
+                    <!-- Critical Findings Card -->
+                    <div id="criticalFindingsCard" class="bg-white rounded-xl border-2 border-red-200 p-6 hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                Critical Findings
+                            </h3>
+                        </div>
+                        <div id="criticalFindingsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Critical findings will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- AI Clinical Assistant Card -->
+                    <div id="aiAssistantCard" class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-indigo-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-robot text-indigo-600 mr-2"></i>
+                                AI Clinical Assistant
+                            </h3>
+                            <button id="generateInsightBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                                <i class="fas fa-sparkles mr-2"></i>Generate Insight
+                            </button>
+                        </div>
+                        <div id="aiInsightContent" class="text-gray-700">
+                            <p class="text-sm text-gray-500 italic">Click "Generate Insight" to get AI-powered clinical interpretation of the ECG analysis.</p>
+                        </div>
+                    </div>
+
+                    <!-- Summary Card -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Analysis Summary</h3>
+                            <span id="signalQuality" class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                                <i class="fas fa-check-circle mr-1"></i>Good Quality
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                <p class="text-2xl font-bold text-gray-900" id="totalBeats">0</p>
+                                <p class="text-xs text-gray-500">Total Beats</p>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                <p class="text-2xl font-bold text-gray-900" id="heartRate">0</p>
+                                <p class="text-xs text-gray-500">Avg BPM</p>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                <p class="text-2xl font-bold text-red-600" id="abnormalBeats">0</p>
+                                <p class="text-xs text-gray-500">Abnormal</p>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                <p class="text-2xl font-bold text-green-600" id="normalPercent">0%</p>
+                                <p class="text-xs text-gray-500">Normal</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ECG Visualization -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">ECG Signal with Beat Annotations</h3>
+                            <div class="text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Annotated ECG signal with beat type labels (N, V, S, F, Q)
+                            </div>
+                        </div>
+                        
+                        <!-- Python Matplotlib ECG Plot -->
+                        <div class="mb-6">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">Python-Generated ECG Plot (Matplotlib)</h4>
+                            <div id="annotatedEcgPlot" class="w-full flex justify-center">
+                                <img id="annotatedEcgImage" src="" alt="ECG Signal" class="max-w-full h-auto rounded-lg shadow-lg" style="display: none;">
+                            </div>
+                        </div>
+                        
+                        <!-- Plotly Interactive ECG Plot -->
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">Interactive ECG Plot (Plotly)</h4>
+                            <div id="ecgPlot" style="height: 500px;"></div>
+                        </div>
+                        
+                        <!-- Legacy fallback -->
+                        <div id="interactiveEcgPlot" style="height: 500px; display: none;"></div>
+                    </div>
+
+                    <!-- Arrhythmia Distribution -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Beat Classification</h3>
+                            <div id="pieChart" style="height: 300px;"></div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">HRV Metrics</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">SDNN</span>
+                                        <span class="text-sm font-medium" id="sdnn">0 ms</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="sdnnBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">RMSSD</span>
+                                        <span class="text-sm font-medium" id="rmssd">0 ms</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="rmssdBar" class="bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">pNN50</span>
+                                        <span class="text-sm font-medium" id="pnn50">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="pnn50Bar" class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Findings -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Clinical Findings</h3>
+                        <div id="clinicalFindings" class="space-y-3">
+                            <!-- Findings will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Export Options -->
+                    <div class="flex justify-end space-x-3">
+                        <button id="exportJSON" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
+                            <i class="fas fa-download mr-2"></i>Export JSON
+                        </button>
+                        <button id="exportPDF" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                            <i class="fas fa-file-pdf mr-2"></i>Export Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="bg-white rounded-xl border border-gray-200 p-12">
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                            <i class="fas fa-wave-square text-gray-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">No ECG Signal Loaded</h3>
+                        <p class="text-sm text-gray-500">Upload an ECG file to begin analysis</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // File upload handling
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loadingState = document.getElementById('loadingState');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        let selectedFile = null;
+
+        // Drag and drop functionality
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFile(e.dataTransfer.files[0]);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+        
+        removeFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInfo.classList.add('hidden');
+            analyzeBtn.disabled = true;
+            fileInput.value = '';
+        });
+
+        function handleFile(file) {
+            if (file) {
+                selectedFile = file;
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileInfo.classList.remove('hidden');
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Analyze button click
+        analyzeBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            // Show loading state
+            emptyState.classList.add('hidden');
+            resultsContainer.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            try {
+                // Send to backend
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Update model metrics
+                if (data.model_metrics) {
+                    document.getElementById('accuracy').textContent = `${(data.model_metrics.accuracy * 100).toFixed(1)}%`;
+                    document.getElementById('precision').textContent = `${(data.model_metrics.precision * 100).toFixed(1)}%`;
+                    document.getElementById('recall').textContent = `${(data.model_metrics.recall * 100).toFixed(1)}%`;
+                    document.getElementById('f1score').textContent = `${(data.model_metrics.f1_score * 100).toFixed(1)}%`;
+                }
+                
+                // Display results
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Error analyzing ECG:', error);
+                alert('An error occurred during analysis. Please try again.');
+            } finally {
+                loadingState.classList.add('hidden');
+            }
+        });
+
+        // Store current analysis data for AI insights
+        let currentAnalysisData = null;
+
+        // View toggle state
+        let isClinicianView = false;
+
+        // View Toggle Handler
+        document.getElementById('viewToggle').addEventListener('click', () => {
+            isClinicianView = !isClinicianView;
+            const toggleBtn = document.getElementById('viewToggle');
+            const patientElements = document.querySelectorAll('.patient-view');
+            const clinicianElements = document.querySelectorAll('.clinician-view');
+            
+            if (isClinicianView) {
+                toggleBtn.innerHTML = '<i class="fas fa-user mr-2"></i>Switch to Patient View';
+                toggleBtn.className = 'bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium';
+                patientElements.forEach(el => el.classList.add('hidden'));
+                clinicianElements.forEach(el => el.classList.remove('hidden'));
+            } else {
+                toggleBtn.innerHTML = '<i class="fas fa-user-md mr-2"></i>Switch to Clinician View';
+                toggleBtn.className = 'bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm font-medium';
+                patientElements.forEach(el => el.classList.remove('hidden'));
+                clinicianElements.forEach(el => el.classList.add('hidden'));
+            }
+        });
+
+        // AI Insight Generator Handler
+        document.getElementById('generateInsightBtn').addEventListener('click', async () => {
+            if (!currentAnalysisData) {
+                alert('No analysis data available');
+                return;
+            }
+            
+            const btn = document.getElementById('generateInsightBtn');
+            const content = document.getElementById('aiInsightContent');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            content.innerHTML = '<p class="text-sm text-gray-500 italic">Generating AI insight...</p>';
+            
+            try {
+                const response = await fetch('/ai_insight', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({analysis_results: currentAnalysisData})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Format the insight text with better structure
+                    let formattedInsight = result.insight;
+                    
+                    // Check if it's a fallback response (contains error markers)
+                    const isFallback = formattedInsight.includes('[⚠️') || formattedInsight.includes('[❌');
+                    
+                    // Convert markdown-style formatting to HTML
+                    formattedInsight = formattedInsight.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-indigo-700">$1</strong>');
+                    
+                    // Highlight error messages
+                    formattedInsight = formattedInsight.replace(/\[⚠️(.*?)\]/g, '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">⚠️ $1</span>');
+                    formattedInsight = formattedInsight.replace(/\[❌(.*?)\]/g, '<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">❌ $1</span>');
+                    
+                    formattedInsight = formattedInsight.replace(/\n\n/g, '</p><p class="mb-3">');
+                    formattedInsight = formattedInsight.replace(/\n/g, '<br>');
+                    
+                    let alertBanner = '';
+                    if (isFallback) {
+                        alertBanner = `
+                            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded">
+                                <div class="flex items-center">
+                                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                    <div>
+                                        <p class="text-sm font-semibold text-red-800">Groq API Failed to Fetch</p>
+                                        <p class="text-xs text-red-600 mt-1">Using fallback analysis. Check console for details.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    content.innerHTML = `
+                        ${alertBanner}
+                        <div class="bg-white rounded-lg p-6 border border-indigo-200 shadow-sm">
+                            <div class="prose prose-sm max-w-none">
+                                <p class="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">${formattedInsight}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                            <p class="text-sm font-semibold text-red-800">Error Generating Insight</p>
+                            <p class="text-xs text-red-600 mt-1">${result.error || 'Unknown error occurred'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('AI insight error:', error);
+                content.innerHTML = `<p class="text-sm text-red-500">Error generating insight: ${error.message}</p>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sparkles mr-2"></i>Generate Insight';
+            }
+        });
+
+        function displayResults(data) {
+            resultsContainer.classList.remove('hidden');
+            currentAnalysisData = data; // Store for AI insights
+            
+            // Update summary stats
+            document.getElementById('totalBeats').textContent = data.total_beats || 0;
+            document.getElementById('heartRate').textContent = data.avg_heart_rate || 0;
+            document.getElementById('abnormalBeats').textContent = data.abnormal_beats || 0;
+            document.getElementById('normalPercent').textContent = `${data.normal_percentage || 0}%`;
+            
+            // Display Critical Findings
+            displayCriticalFindings(data.critical_findings || []);
+            
+            // Update signal quality
+            const qualityBadge = document.getElementById('signalQuality');
+            if (data.signal_quality_score >= 0.8) {
+                qualityBadge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Good Quality';
+                qualityBadge.className = 'text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full';
+            } else if (data.signal_quality_score >= 0.5) {
+                qualityBadge.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>Fair Quality';
+                qualityBadge.className = 'text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full';
+            } else {
+                qualityBadge.innerHTML = '<i class="fas fa-times-circle mr-1"></i>Poor Quality';
+                qualityBadge.className = 'text-sm bg-red-100 text-red-800 px-3 py-1 rounded-full';
+            }
+            
+            // Display annotated ECG plot (Python-generated Matplotlib)
+            console.log('📊 ECG Plot Data Check:', {
+                has_annotated_plot: !!data.annotated_ecg_plot,
+                plot_length: data.annotated_ecg_plot ? data.annotated_ecg_plot.length : 0,
+                has_interactive_plot: !!data.interactive_plot,
+                has_ecg_plot: !!data.ecg_plot
+            });
+            
+            if (data.annotated_ecg_plot) {
+                console.log('✅ Displaying Python-generated ECG plot');
+                const imgElement = document.getElementById('annotatedEcgImage');
+                imgElement.src = 'data:image/png;base64,' + data.annotated_ecg_plot;
+                imgElement.style.display = 'block';
+                imgElement.onload = () => console.log('✅ ECG plot image loaded successfully');
+                imgElement.onerror = () => console.error('❌ Failed to load ECG plot image');
+            } else {
+                console.warn('⚠️ No annotated_ecg_plot in response data');
+                document.getElementById('annotatedEcgImage').style.display = 'none';
+            }
+            
+            // Display Plotly interactive ECG plot
+            if (data.interactive_plot) {
+                const plotData = JSON.parse(data.interactive_plot);
+                Plotly.newPlot('ecgPlot', plotData.data, plotData.layout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['lasso2d', 'select2d']
+                });
+            } else if (data.ecg_plot) {
+                // Fallback to basic plot
+                const plotData = JSON.parse(data.ecg_plot);
+                Plotly.newPlot('ecgPlot', plotData.data, plotData.layout, {responsive: true});
+            }
+            
+            // Plot pie chart
+            if (data.beat_distribution) {
+                const pieData = [{
+                    values: Object.values(data.beat_distribution),
+                    labels: Object.keys(data.beat_distribution),
+                    type: 'pie',
+                    marker: {
+                        colors: ['#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#6b7280']
+                    }
+                }];
+                const pieLayout = {
+                    margin: {t: 0, b: 0, l: 0, r: 0},
+                    showlegend: true,
+                    legend: {orientation: 'v'}
+                };
+                Plotly.newPlot('pieChart', pieData, pieLayout, {responsive: true});
+            }
+            
+            // Update HRV metrics
+            if (data.hrv_metrics) {
+                document.getElementById('sdnn').textContent = `${data.hrv_metrics.sdnn.toFixed(1)} ms`;
+                document.getElementById('rmssd').textContent = `${data.hrv_metrics.rmssd.toFixed(1)} ms`;
+                document.getElementById('pnn50').textContent = `${data.hrv_metrics.pnn50.toFixed(1)}%`;
+                
+                // Update progress bars
+                document.getElementById('sdnnBar').style.width = `${Math.min(data.hrv_metrics.sdnn / 2, 100)}%`;
+                document.getElementById('rmssdBar').style.width = `${Math.min(data.hrv_metrics.rmssd / 2, 100)}%`;
+                document.getElementById('pnn50Bar').style.width = `${data.hrv_metrics.pnn50}%`;
+            }
+            
+            // Display clinical findings
+            const findingsContainer = document.getElementById('clinicalFindings');
+            findingsContainer.innerHTML = '';
+            if (data.clinical_findings && data.clinical_findings.length > 0) {
+                data.clinical_findings.forEach(finding => {
+                    const findingEl = document.createElement('div');
+                    findingEl.className = 'flex items-start space-x-3 p-3 bg-gray-50 rounded-lg';
+                    findingEl.innerHTML = `
+                        <i class="fas fa-info-circle text-indigo-500 mt-0.5"></i>
+                        <p class="text-sm text-gray-700">${finding}</p>
+                    `;
+                    findingsContainer.appendChild(findingEl);
+                });
+            } else {
+                findingsContainer.innerHTML = '<p class="text-sm text-gray-500">No significant findings detected.</p>';
+            }
+        }
+
+        // Display Critical Findings
+        function displayCriticalFindings(findings) {
+            const card = document.getElementById('criticalFindingsCard');
+            const list = document.getElementById('criticalFindingsList');
+            
+            if (!findings || findings.length === 0) {
+                card.classList.add('hidden');
+                return;
+            }
+            
+            card.classList.remove('hidden');
+            list.innerHTML = '';
+            
+            const severityColors = {
+                'critical': {bg: 'bg-red-100', border: 'border-red-500', text: 'text-red-800', icon: 'text-red-600'},
+                'high': {bg: 'bg-orange-100', border: 'border-orange-500', text: 'text-orange-800', icon: 'text-orange-600'},
+                'moderate': {bg: 'bg-yellow-100', border: 'border-yellow-500', text: 'text-yellow-800', icon: 'text-yellow-600'},
+                'low': {bg: 'bg-blue-100', border: 'border-blue-500', text: 'text-blue-800', icon: 'text-blue-600'}
+            };
+            
+            findings.forEach(finding => {
+                const severity = finding.severity || 'low';
+                const colors = severityColors[severity] || severityColors['low'];
+                
+                const cardEl = document.createElement('div');
+                cardEl.className = `rounded-lg border-2 ${colors.border} ${colors.bg} p-4`;
+                cardEl.innerHTML = `
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center">
+                            <i class="fas ${finding.icon || 'fa-info-circle'} ${colors.icon} mr-2"></i>
+                            <h4 class="font-semibold ${colors.text}">${finding.title}</h4>
+                        </div>
+                        <span class="text-xs font-bold ${colors.text} px-2 py-1 rounded-full ${colors.bg}">${severity.toUpperCase()}</span>
+                    </div>
+                    <div class="${colors.text} text-2xl font-bold mb-1">${finding.value}</div>
+                    <p class="text-xs ${colors.text} opacity-75">${finding.description}</p>
+                `;
+                list.appendChild(cardEl);
+            });
+        }
+
+        // Export functionality
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            if (!currentAnalysisData) {
+                alert('No analysis data available. Please analyze an ECG first.');
+                return;
+            }
+            
+            // Create JSON string
+            const dataStr = JSON.stringify(currentAnalysisData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create download link
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ecg_report_${new Date().toISOString().split('T')[0]}_${new Date().toISOString().split('T')[1].split('.')[0].replace(/:/g, '-')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('exportPDF').addEventListener('click', async () => {
+            if (!currentAnalysisData) {
+                alert('No analysis data available. Please analyze an ECG first.');
+                return;
+            }
+            
+            try {
+                // Show loading
+                const btn = document.getElementById('exportPDF');
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating PDF...';
+                
+                // Request PDF from backend
+                const response = await fetch('/export_pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ analysis_data: currentAnalysisData })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ecg_report_${new Date().toISOString().split('T')[0]}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } else {
+                    const error = await response.json();
+                    alert('Error generating PDF: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('PDF export error:', error);
+                alert('Error generating PDF: ' + error.message);
+            } finally {
+                const btn = document.getElementById('exportPDF');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-file-pdf mr-2"></i>Export Report';
+            }
+        });
+    </script>
+<footer>
+    Made with Passion for <strong>DPEDA Project</strong>
+  </footer>
+</body>
+</html>
