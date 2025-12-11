@@ -2,7 +2,7 @@
 
 A full-stack web application for analyzing ECG signals and detecting arrhythmias using machine learning. Built with Flask, Python, and modern web technologies.
 
-![ECG Analyzer](https://img.shields.io/badge/ECG-Analyzer-blue)
+![ECG Analyzer](https://img.shields.io/badge/ECG-Analyzer-orange)
 ![Python](https://img.shields.io/badge/Python-3.8+-green)
 ![Flask](https://img.shields.io/badge/Flask-3.0-red)
 ![License](https://img.shields.io/badge/License-Educational-yellow)
