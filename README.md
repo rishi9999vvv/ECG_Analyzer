@@ -375,7 +375,7 @@ This is a college project. Feel free to:
 For questions or issues:
 1. Check the troubleshooting section
 2. Review the code comments
-3. Contact your project advisor
+3. Contact us
 
 ## 🎓 Academic Use
 
