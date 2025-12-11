@@ -375,7 +375,7 @@ This is a college project. Feel free to:
 For questions or issues:
 1. Check the troubleshooting section
 2. Review the code comments
-3. Contact your project advisor
+3. Contact us
 
 ## 🎓 Academic Use
 
@@ -391,19 +391,6 @@ ECG Analyzer - Advanced Arrhythmia Detection System
 The MIT-BIH Arrhythmia Database is available at:
 https://physionet.org/content/mitdb/1.0.0/
 
-## 🚀 Future Enhancements
-
-Possible improvements for future versions:
-- [ ] Real-time ECG monitoring
-- [ ] Multi-lead ECG support
-- [ ] Deep learning models (CNN, LSTM)
-- [ ] Mobile app integration
-- [ ] Cloud deployment
-- [ ] User authentication
-- [ ] Database integration
-- [ ] Advanced HRV analysis
-- [ ] Report generation in multiple formats
-- [ ] Batch processing support
 
 ## ✨ Acknowledgments
 
@@ -415,4 +402,4 @@ Possible improvements for future versions:
 
 ---
 
-**Made with ❤️ for Academic Excellence**
+**Made with ❤️ for DPEDA Project by Rishi Dwivedi,Rishik Gupta and Sachit Subbu**
