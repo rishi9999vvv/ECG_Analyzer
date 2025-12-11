@@ -7,6 +7,10 @@ scipy==1.11.3
 scikit-learn==1.3.1
 joblib==1.3.2
 
+# Build dependencies
+setuptools
+wheel
+
 # ECG Signal Processing
 wfdb==4.1.2
 PyWavelets==1.4.1
@@ -24,21 +28,15 @@ python-dotenv==1.0.0
 gunicorn==21.2.0
 
 # Optional for enhanced features
-h5py==3.9.0  # For MATLAB file support
-xlrd==2.0.1  # For Excel file support
-openpyxl==3.1.2  # For Excel file support
-
-# Development dependencies (optional)
-pytest==7.4.2
-pytest-flask==1.2.0
-black==23.9.1
-flake8==6.1.0
+h5py==3.9.0
+xlrd==2.0.1
+openpyxl==3.1.2
 
 # AI/ML Dependencies
-requests==2.31.0  # For Hugging Face API calls
+requests==2.31.0
 
 # PDF Generation
-reportlab==4.0.7  # For PDF report generation
+reportlab==4.0.7
 
-# Plotly for interactive visualizations
-kaleido==0.2.1  # For Plotly static image export
+# Plotly static export (Disabled due to build issues)
+# kaleido==0.2.1
